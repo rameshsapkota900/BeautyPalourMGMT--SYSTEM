@@ -37,17 +37,23 @@ public class BookingService {
         com.beautyparlour.entity.Course course = courseRepository.findById(request.getCourseId())
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
 
+        // Validate phone number
+        String phone = validateAndNormalizePhone(request.getPhone());
+
         CourseBooking booking = new CourseBooking(
                 course.getParlourId(),
                 request.getCourseId(),
-                request.getClientName(),
-                request.getPhone()
+                request.getClientName().trim(),
+                phone
         );
         return courseBookingRepository.save(booking);
     }
 
     public List<CourseBooking> getCourseBookingsByClient(String clientName, String phone) {
-        return courseBookingRepository.findByClientNameAndPhone(clientName, phone);
+        System.out.println("Searching for bookings - Client: '" + clientName + "', Phone: '" + phone + "'");
+        List<CourseBooking> bookings = courseBookingRepository.findByClientNameAndPhone(clientName, phone);
+        System.out.println("Found " + bookings.size() + " bookings");
+        return bookings;
     }
 
     public List<CourseBooking> getCourseBookingsByParlour(UUID parlourId) {
@@ -87,11 +93,14 @@ public class BookingService {
         com.beautyparlour.entity.Service service = serviceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Service not found"));
 
+        // Validate phone number
+        String phone = validateAndNormalizePhone(request.getPhone());
+
         ServiceBooking booking = new ServiceBooking(
                 service.getParlourId(),
                 request.getServiceId(),
-                request.getClientName(),
-                request.getPhone()
+                request.getClientName().trim(),
+                phone
         );
         return serviceBookingRepository.save(booking);
     }
@@ -129,5 +138,18 @@ public class BookingService {
         }
 
         return serviceBookingRepository.save(booking);
+    }
+
+    // Helper method to validate and normalize phone numbers
+    private String validateAndNormalizePhone(String phone) {
+        // Remove any non-digit characters
+        String normalized = phone.replaceAll("[^0-9]", "");
+
+        // Check if it's a valid 10-digit number after normalization
+        if (normalized.length() != 10) {
+            throw new IllegalArgumentException("Phone number must be a 10-digit number");
+        }
+
+        return normalized;
     }
 }

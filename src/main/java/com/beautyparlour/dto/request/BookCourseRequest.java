@@ -2,6 +2,7 @@ package com.beautyparlour.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;
 
@@ -13,6 +14,7 @@ public class BookCourseRequest {
     private String clientName;
 
     @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^[0-9]{10}$", message = "Phone number must be a 10-digit number")
     private String phone;
 
     // Constructors
